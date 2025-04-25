@@ -33,7 +33,21 @@ Dataset terdiri dari 9 kolom:
 
 ---
 
-## 4. Data Preparation
+## 4. Exploratory Data Analysis (EDA)
+Analisis deskriptif dilakukan untuk memahami struktur dan pola dalam data:
+- **Distribusi `TotalCost`** menunjukkan sebaran target yang cukup lebar, dengan kemungkinan outlier.
+- **Heatmap Korelasi** menunjukkan korelasi positif yang kuat antara `Quantity` dan `TotalCost`.
+- **Boxplot** menunjukkan variasi harga per kategori barang.
+- Tidak ditemukan missing value pada dataset.
+
+Contoh visualisasi yang digunakan:
+- Histogram distribusi `TotalCost`
+- Heatmap korelasi
+- Boxplot `UnitPrice` per `Category` 
+
+---
+
+## 5. Data Preparation
 Langkah-langkah:
 - Encode kolom kategorikal: `Category`, `Supplier`, `Buyer`
 - Gunakan fitur numerik dan kategorikal yang sudah di-encode
@@ -41,12 +55,12 @@ Langkah-langkah:
 
 ---
 
-## 5. Modeling
+## 6. Modeling
 Model utama yang digunakan adalah **Random Forest Regressor**.
 
 ---
 
-## 6. Evaluation
+## 7. Evaluation
 Evaluasi dilakukan menggunakan:
 - MAE (Mean Absolute Error)
 - RMSE (Root Mean Squared Error)
@@ -54,10 +68,10 @@ Evaluasi dilakukan menggunakan:
 
 ---
 
-## 7. Kesimpulan
+## 8. Kesimpulan
 Model berhasil memprediksi total pengeluaran berdasarkan fitur `Category`, `Quantity`, `UnitPrice`, `Supplier`, dan `Buyer`.
 
-Langkah selanjutnya:
+Saran Langkah selanjutnya:
 - Coba model lain seperti Linear Regression, XGBoost
 - Tuning hyperparameter
 - Tambah visualisasi untuk membandingkan prediksi vs real
