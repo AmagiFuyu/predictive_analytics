@@ -3,6 +3,7 @@
 **Nama Proyek**: Spend Analysis Prediction  
 **Pendekatan**: Regresi  
 **Target**: TotalCost
+**dataset**: https://www.kaggle.com/datasets/shahriarkabir/company-purchasing-dataset
 
 ---
 
