@@ -1,93 +1,62 @@
-# Prediksi Nilai Pembelian Perusahaan Berdasarkan Karakteristik dan Segmen Pasar
+# Laporan Proyek Machine Learning: Prediksi Total Pengeluaran
 
-Proyek Machine Learning untuk submission kelas Dicoding: Machine Learning  
+**Nama Proyek**: Spend Analysis Prediction  
 **Pendekatan**: Regresi  
-**Target**: Purchase Amount
+**Target**: TotalCost
 
 ---
 
 ## 1. Pendahuluan
-Perusahaan membutuhkan strategi yang lebih baik untuk memprioritaskan pelanggan potensial. 
-Dengan memprediksi `Purchase Amount` berdasarkan data historis, perusahaan dapat lebih efektif 
-mengalokasikan sumber daya dan strategi pemasaran.
+Dalam pengelolaan anggaran perusahaan, penting untuk memahami faktor-faktor yang memengaruhi total pengeluaran dari tiap transaksi. Dengan prediksi yang akurat, perusahaan dapat mengelola anggaran dan negosiasi dengan supplier secara lebih efisien.
 
 ---
 
 ## 2. Problem Domain
-- **Latar Belakang**: Data pembelian perusahaan dari berbagai negara dan industri
-- **Masalah**: Sulit memprediksi nilai pembelian perusahaan baru
-- **Solusi**: Gunakan machine learning untuk memprediksi nilai pembelian
-- **Manfaat**: Membantu tim sales fokus pada klien bernilai tinggi
+- **Masalah**: Prediksi total biaya pembelian (`TotalCost`) berdasarkan data transaksi.
+- **Solusi**: Model regresi untuk memprediksi nilai `TotalCost`.
+- **Manfaat**: Menyediakan insight terhadap pengeluaran berdasarkan jenis barang, supplier, dan pembeli.
 
 ---
 
 ## 3. Data Understanding
-Dataset berisi informasi:
-- Nama perusahaan, negara, wilayah
-- Kategori produk, jumlah karyawan, revenue tahunan
-- Jumlah pembelian (`Purchase Amount`)
-- Segmen pelanggan
+Dataset terdiri dari 9 kolom:
+- `TransactionID`: ID transaksi
+- `ItemName`: Nama barang
+- `Category`: Kategori barang
+- `Quantity`: Jumlah barang
+- `UnitPrice`: Harga satuan
+- `TotalCost`: Harga total (target)
+- `PurchaseDate`: Tanggal pembelian
+- `Supplier`: Pemasok
+- `Buyer`: Pembeli
 
 ---
 
 ## 4. Data Preparation
-- Cek missing value
-- Encode kolom kategorikal
-- Normalisasi fitur numerik
-- Split data ke train/test
-
-```python
-# Preprocessing dasar
-cat_cols = ['Country', 'Region', 'Product Category', 'Customer Segment']
-num_cols = ['Employee Count', 'Annual Revenue']
-
-# Encode categorical
-le = LabelEncoder()
-for col in cat_cols:
-    df[col] = le.fit_transform(df[col])
-
-# Scale numerical
-scaler = StandardScaler()
-df[num_cols] = scaler.fit_transform(df[num_cols])
-```
+Langkah-langkah:
+- Encode kolom kategorikal: `Category`, `Supplier`, `Buyer`
+- Gunakan fitur numerik dan kategorikal yang sudah di-encode
+- Split data menjadi training dan testing
 
 ---
 
 ## 5. Modeling
-Model awal: Linear Regression  
-Langkah selanjutnya: Random Forest, XGBoost
-
-```python
-# Linear Regression
-lr = LinearRegression()
-lr.fit(X_train, y_train)
-y_pred_lr = lr.predict(X_test)
-```
+Model utama yang digunakan adalah **Random Forest Regressor**.
 
 ---
 
 ## 6. Evaluation
-Gunakan metrik:
+Evaluasi dilakukan menggunakan:
 - MAE (Mean Absolute Error)
 - RMSE (Root Mean Squared Error)
 - R² Score
 
-```python
-mae = mean_absolute_error(y_test, y_pred_lr)
-rmse = np.sqrt(mean_squared_error(y_test, y_pred_lr))
-r2 = r2_score(y_test, y_pred_lr)
-
-print(f"MAE: {mae:.2f}")
-print(f"RMSE: {rmse:.2f}")
-print(f"R²: {r2:.2f}")
-```
-
 ---
 
 ## 7. Kesimpulan
-Model regresi dapat digunakan untuk memprediksi nilai pembelian berdasarkan karakteristik perusahaan.
+Model berhasil memprediksi total pengeluaran berdasarkan fitur `Category`, `Quantity`, `UnitPrice`, `Supplier`, dan `Buyer`.
 
 Langkah selanjutnya:
-- Eksperimen dengan model lain
+- Coba model lain seperti Linear Regression, XGBoost
 - Tuning hyperparameter
-- Visualisasi hasil prediksi vs aktual
+- Tambah visualisasi untuk membandingkan prediksi vs real
