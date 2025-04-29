@@ -1,91 +1,60 @@
-# **Prediksi Total Pengeluaran Berdasarkan Transaksi Pembelian**
+# Laporan Proyek Machine Learning: Prediksi Total Pengeluaran Bulanan
 
-## **Domain Permasalahan**
-Manajemen pengeluaran merupakan aspek krusial dalam operasional perusahaan. Dengan memahami pola pembelian dan faktor-faktor yang memengaruhi total pengeluaran, perusahaan dapat mengoptimalkan anggaran dan meningkatkan efisiensi.
+## 1. Pendahuluan
 
-## **Business Understanding**
-### Problem Statements
-Perusahaan mengalami tantangan dalam memperkirakan pengeluaran bulanan berdasarkan histori transaksi pembelian. Kesalahan dalam prediksi dapat mengganggu alokasi anggaran dan perencanaan keuangan.
+Proyek ini bertujuan untuk memprediksi total pengeluaran bulanan berdasarkan data transaksi yang tersedia. Metode yang digunakan adalah Long Short-Term Memory (LSTM), salah satu jenis Recurrent Neural Network (RNN) yang efektif untuk memproses data time series.
 
-### Goals
-Membangun model Machine Learning berbasis time series forecasting yang mampu memprediksi total pengeluaran (`TotalCost`) per bulan di masa depan, menggunakan data historis transaksi pembelian.
+## 2. Dataset
 
-## **Data Understanding**
-Dataset berasal dari [Kaggle - Company Purchasing Dataset](https://www.kaggle.com/datasets/shahriarkabir/company-purchasing-dataset).
+Dataset berisi **500 data transaksi** dengan **9 kolom**. Kolom target adalah `TotalCost`, sedangkan kolom `PurchaseDate` digunakan sebagai acuan waktu.
 
-### Jumlah Data
-- Jumlah baris: 500
-- Jumlah kolom: 9
+### Informasi Dataset:
+- Tidak terdapat nilai kosong (missing value).
+- Data difokuskan hanya pada kolom `PurchaseDate` dan `TotalCost`.
+- Data diresemple menjadi total per bulan untuk keperluan prediksi time series.
 
-### Kondisi Data
-- Tidak ditemukan missing value.
-- Tidak terdapat data duplikat.
-- Ditemukan outlier pada kolom `TotalCost` (dianalisis melalui distribusi data).
+## 3. Exploratory Data Analysis (EDA)
 
-### Uraian Fitur
-- `TransactionID`: ID transaksi
-- `ItemName`: Nama barang
-- `Category`: Kategori barang
-- `Quantity`: Jumlah barang
-- `UnitPrice`: Harga satuan
-- `TotalCost`: Harga total (target)
-- `PurchaseDate`: Tanggal pembelian
-- `Supplier`: Pemasok
-- `Buyer`: Pembeli
+Beberapa langkah EDA dilakukan untuk memahami karakteristik data:
+- Distribusi `TotalCost` menunjukkan adanya outlier.
+- Korelasi antara `Unitprice` dan `TotalCost` cukup kuat, menunjukkan bahwa harga unit berpengaruh besar terhadap pengeluaran.
 
-### Exploratory Data Analysis (EDA)
-- Distribusi `TotalCost` menunjukkan sebaran yang luas, dengan indikasi adanya outlier.
-- Korelasi kuat antara `Quantity` dan `TotalCost`.
-- Rata-rata `UnitPrice` berbeda signifikan antar kategori.
-- Tren pembelian total per bulan cenderung fluktuatif.
+## 4. Data Preparation
 
-## **Data Preparation**
-- Konversi `PurchaseDate` menjadi tipe datetime.
-- Menjadikan `PurchaseDate` sebagai indeks.
-- Resampling data menjadi agregasi bulanan.
-- Normalisasi data menggunakan MinMaxScaler.
-- Membuat windowed dataset untuk LSTM dengan window size = 3.
-- Membagi data menjadi 80% training dan 20% testing.
+- Kolom `PurchaseDate` dikonversi ke datetime dan dijadikan index.
+- Data diresample ke bentuk bulanan.
+- Dilakukan scaling menggunakan `MinMaxScaler`.
+- Dibuat window time series untuk data training dan testing.
 
-## **Modeling**
-Model yang digunakan adalah **LSTM (Long Short-Term Memory)**.
+## 5. Model Development
 
-### Arsitektur Model
-- Input: 3 time steps
-- 1 LSTM layer dengan 64 unit, activation `relu`
-- 1 Dense layer sebagai output
+### Model: LSTM
 
-### Konfigurasi Training
+#### Cara Kerja:
+LSTM dirancang untuk mengingat informasi dalam jangka panjang. Sangat cocok untuk data berurutan seperti time series karena mampu menangkap pola musiman.
+
+#### Arsitektur:
+- LSTM dengan 64 unit dan aktivasi ReLU
+- Output layer: Dense(1)
 - Optimizer: Adam
-- Loss function: Mean Squared Error (MSE)
-- EarlyStopping dengan patience 10
-- Maksimal 100 epoch
+- Loss Function: Mean Squared Error (MSE)
+- Epoch: 130
+- Parameter lain menggunakan nilai default.
 
-### Penjelasan LSTM
-LSTM efektif dalam mempelajari pola jangka panjang pada data time series karena memiliki mekanisme memory cell yang mengatasi masalah vanishing gradient.
+## 6. Evaluasi Model
 
-## **Evaluation**
-Model dievaluasi menggunakan metrik berikut:
+### Metrik Evaluasi:
 
-- **Mean Absolute Error (MAE)**: 7108.12  
-  → Rata-rata kesalahan prediksi model sekitar ±7108 satuan TotalCost setiap bulannya.
+- **MAE (Mean Absolute Error)**: Mengukur rata-rata selisih absolut antara prediksi dan nilai sebenarnya.
+- **RMSE (Root Mean Squared Error)**: Memberikan penalti lebih besar terhadap error yang besar (lebih sensitif terhadap outlier).
 
-- **Root Mean Squared Error (RMSE)**: 7935.66
-  → Rata-rata kesalahan model sekitar 7935 satuan TotalCost, sensitif terhadap outlier.
+### Hasil Evaluasi:
 
-### Visualisasi
-Plot prediksi vs aktual menunjukkan bahwa model mampu **mengikuti pola fluktuasi** pengeluaran bulanan dengan baik, meskipun terdapat sedikit deviasi pada beberapa titik data.
+- **MAE: 4589.25**
+- **RMSE: 4760.40**
 
-### Insight
-Model mampu menghasilkan prediksi yang akurat terhadap tren pengeluaran bulanan, meskipun akurasi bisa ditingkatkan lagi dengan tuning parameter atau penggunaan model lanjutan seperti GRU.
+### Interpretasi:
+Model memiliki performa yang cukup baik, dengan kesalahan prediksi rata-rata sekitar 4,5 ribuan satuan. RMSE yang relatif kecil menunjukkan performa model yang stabil dan akurat.
+## 7. Kesimpulan
 
-## **Model Improvement (Optional)**
-- Menambahkan fitur turunan seperti `Month`, `Quarter`, `Day of Week`.
-- Mencoba arsitektur lain seperti GRU.
-- Hyperparameter tuning (jumlah neuron, learning rate, batch size).
-- Menggunakan lebih banyak data historis untuk memperpanjang sequence input.
-
-## **Referensi**
-- [Scikit-Learn Documentation](https://scikit-learn.org/stable/)
-- [Keras LSTM Documentation](https://keras.io/api/layers/recurrent_layers/lstm/)
-- Dataset: *Company Purchasing Dataset* by Shahriar Kabir (Kaggle)
+Model LSTM mampu memprediksi total pengeluaran bulanan dengan cukup akurat. Ke depan, performa dapat ditingkatkan dengan tuning parameter, penambahan fitur tambahan, atau eksplorasi model time series lainnya seperti GRU atau Prophet.

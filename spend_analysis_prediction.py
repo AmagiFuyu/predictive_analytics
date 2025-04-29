@@ -7,6 +7,8 @@ Original file is located at
     https://colab.research.google.com/drive/1SWNI2xMFOHlEru0aE2U6wRICH2f7iC18
 
 ## 1. Import Library
+
+mengimpor berbagai library yang dibutuhkan. Library seperti `pandas` dan `numpy` digunakan untuk manipulasi data, `matplotlib` dan `seaborn` untuk visualisasi data, serta `tensorflow.keras` untuk membangun model deep learning.
 """
 
 import pandas as pd
@@ -21,43 +23,52 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 """## 2. Load Dataset
 
+memuat dataset transaksi yang akan digunakan untuk analisis dan prediksi.
+
 """
 
 df = pd.read_csv('/content/spend_analysis_dataset.csv')
 
 """## 3. Data Understanding
+Pada tahapan ini kita melihat struktur awal data.
 
 ### Menampilkan 5 data teratas
+Digunakan untuk melihat struktur awal data.
 """
 
 print(df.head())
 
 """### Cek informasi dataset
+Digunakan untuk mengetahui jumlah kolom, tipe data, dan apakah ada nilai kosong.
 
 """
 
 print(df.info())
 
 """### Cek missing values
-
+Penting untuk melihat apakah ada data yang hilang dan perlu ditangani.
 """
 
 print(df.isnull().sum())
 
 """### Cek duplikat
-
+melihat apakah ada data duplikat
 """
 
 print(df.duplicated().sum())
 
-"""## 4. Exploratory Data Analysis (EDA)
+"""## Exploratory Data Analysis (EDA)
+melakukan eksplorasi data
 
 ### Statistik Deskriptif
+Memberikan gambaran umum distribusi dan nilai-nilai statistik tiap fitur numerik.
 """
 
 df.describe()
 
 """### Plot distribusi TotalCost
+Visualisasi distribusi kolom target (TotalCost) untuk mengidentifikasi outlier dan pola umum.
+
 
 """
 
@@ -69,7 +80,10 @@ plt.ylabel('Frekuensi')
 plt.grid()
 plt.show()
 
-"""### Korelasi Quantity, UnitPrice, TotalCost"""
+"""### Korelasi Quantity, UnitPrice, TotalCost
+Menampilkan korelasi antar fitur numerik untuk memahami hubungan antar fitur.
+
+"""
 
 plt.figure(figsize=(6,5))
 sns.heatmap(df[['Quantity', 'UnitPrice', 'TotalCost']].corr(), annot=True, cmap='coolwarm')
@@ -77,36 +91,29 @@ plt.title('Heatmap Korelasi Fitur Numerik')
 plt.grid()
 plt.show()
 
-"""## 5. Data Preparation"""
+"""## 4. Data Preparation
 
-# Pastikan PurchaseDate bertipe datetime
+### Konversi Kolom Tanggal dan Set Index
+Mengubah kolom tanggal menjadi format datetime dan menjadikannya index agar bisa digunakan untuk resampling.
+"""
+
 df['PurchaseDate'] = pd.to_datetime(df['PurchaseDate'])
-
-# Gunakan hanya kolom PurchaseDate dan TotalCost
 df = df[['PurchaseDate', 'TotalCost']]
-
-# Set PurchaseDate menjadi index
 df.set_index('PurchaseDate', inplace=True)
 
-# Resample data menjadi bulanan (monthly)
+"""### Resample Data Bulanan
+Mengelompokkan data per bulan agar pola musiman dapat dianalisis.
+"""
+
 df_monthly = df.resample('M').sum()
 
-# Plot total cost per bulan
-plt.figure(figsize=(12,6))
-plt.plot(df_monthly, marker='o')
-plt.title('Total Cost per Month')
-plt.xlabel('Month')
-plt.ylabel('Total Cost')
-plt.grid()
-plt.show()
+"""### Scaling dan Membuat Windowed Dataset
+LSTM membutuhkan data dalam bentuk yang terstandardisasi dan dalam bentuk window time series.
+"""
 
-"""## 6. Membuat Windowed Dataset"""
-
-# Scaling data
 scaler = MinMaxScaler()
 df_scaled = scaler.fit_transform(df_monthly)
 
-# Fungsi membuat window dataset
 def create_windowed_dataset(series, window_size):
     X, y = [], []
     for i in range(len(series) - window_size):
@@ -117,12 +124,23 @@ def create_windowed_dataset(series, window_size):
 window_size = 3
 X, y = create_windowed_dataset(df_scaled, window_size)
 
-# Split data (80% train, 20% test)
 split_idx = int(len(X)*0.8)
 X_train, X_test = X[:split_idx], X[split_idx:]
 y_train, y_test = y[:split_idx], y[split_idx:]
 
-"""## 7. Modeling"""
+"""## 5. Modeling
+
+### Model 1: LSTM
+
+#### Cara Kerja:
+LSTM (Long Short-Term Memory) adalah jenis Recurrent Neural Network (RNN) yang digunakan untuk menangani data sekuensial seperti data time series. LSTM memiliki kemampuan untuk mengingat informasi dalam jangka panjang, sehingga cocok untuk prediksi berdasarkan urutan waktu.
+
+#### Arsitektur dan Parameter:
+- `LSTM(64, activation='relu')`: Layer LSTM dengan 64 unit dan fungsi aktivasi ReLU.
+- `Dense(1)`: Layer output untuk prediksi nilai tunggal.
+- Optimizer: `adam`, Loss function: `mse` (Mean Squared Error).
+- Parameter lain menggunakan default.
+"""
 
 #LTSM
 model = Sequential([
@@ -132,31 +150,52 @@ model = Sequential([
 
 model.compile(optimizer='adam', loss='mse')
 
-"""## 8. Training"""
+"""## 6. Training
+Model dilatih dengan data training, dan menggunakan early stopping untuk menghentikan pelatihan jika validasi tidak membaik dalam 10 epoch berturut-turut.
+
+"""
 
 history = model.fit(
     X_train, y_train,
-    epochs=100,
+    epochs=130,
     validation_data=(X_test, y_test),
     callbacks=[EarlyStopping(patience=10, restore_best_weights=True)],
     verbose=1
 )
 
-"""## 9. Evaluasi Model"""
+"""## 7. Evaluasi Model
+
+### Apa itu Metrik Evaluasi?
+- **MAE (Mean Absolute Error)**: Rata-rata kesalahan absolut antara nilai aktual dan prediksi. Semakin kecil nilainya, semakin akurat model.
+- **RMSE (Root Mean Squared Error)**: Akar dari rata-rata kuadrat kesalahan. Lebih sensitif terhadap outlier daripada MAE.
+
+### Hasil Evaluasi
+Model diuji dengan data test. Nilai prediksi dan aktual dikembalikan ke skala aslinya (inverse transform) untuk dihitung metrik evaluasinya.
+"""
 
 # Prediksi
 y_pred = model.predict(X_test)
 
-# Inverse transform hasil prediksi dan y_test
+"""### Inverse transform hasil prediksi dan y_test
+
+ mengembalikan hasil prediksi (y_pred) dan data aktual (y_test) ke skala aslinya (sebelum dilakukan scaling). Hal ini penting agar kita dapat membandingkan hasil prediksi dengan nilai aktual dalam satuan yang sebenarnya
+"""
+
 y_pred_inv = scaler.inverse_transform(np.concatenate((np.zeros((len(y_pred), df_monthly.shape[1]-1)), y_pred), axis=1))[:, -1]
 y_test_inv = scaler.inverse_transform(np.concatenate((np.zeros((len(y_test), df_monthly.shape[1]-1)), y_test), axis=1))[:, -1]
 
-# Hitung metrik evaluasi
+""" menghitung nilai Mean Absolute Error (MAE) dan Root Mean Squared Error (RMSE) untuk mengukur performa model dalam memprediksi total biaya (TotalCost)."""
+
 mae = mean_absolute_error(y_test_inv, y_pred_inv)
 rmse = np.sqrt(mean_squared_error(y_test_inv, y_pred_inv))
 
 print(f"MAE: {mae:.2f}")
 print(f"RMSE: {rmse:.2f}")
+
+"""### Visualisasi Prediksi vs Aktual
+Visualisasi ini bertujuan untuk melihat seberapa dekat hasil prediksi dengan nilai aktualnya.
+
+"""
 
 # Plot hasil prediksi vs aktual
 plt.figure(figsize=(12,6))
@@ -168,3 +207,14 @@ plt.xlabel('Time')
 plt.ylabel('Total Cost')
 plt.grid()
 plt.show()
+
+"""### Insight Evaluasi:
+- Model mampu mengikuti tren data pengeluaran bulanan dengan cukup baik.
+
+- MAE = 4589.25 → menunjukkan bahwa rata-rata kesalahan prediksi hanya sekitar 4,5 ribu satuan, yang tergolong rendah dan menandakan model cukup akurat.
+
+- RMSE = 4760.40 → menunjukkan kesalahan prediksi keseluruhan relatif kecil, menunjukkan performa model yang stabil dan akurat.
+
+
+
+"""
