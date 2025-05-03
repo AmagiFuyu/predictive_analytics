@@ -1,60 +1,93 @@
-# Laporan Proyek Machine Learning: Prediksi Total Pengeluaran Bulanan
+# Proyek Machine Learning: Prediksi Total Pengeluaran Bulanan dengan LSTM
 
-## 1. Pendahuluan
+## Domain Proyek
 
-Proyek ini bertujuan untuk memprediksi total pengeluaran bulanan berdasarkan data transaksi yang tersedia. Metode yang digunakan adalah Long Short-Term Memory (LSTM), salah satu jenis Recurrent Neural Network (RNN) yang efektif untuk memproses data time series.
+Dalam pengelolaan bisnis, salah satu tantangan utama adalah mengontrol dan memprediksi pengeluaran operasional secara akurat. Ketidakpastian dalam proyeksi anggaran bisa berdampak besar terhadap efisiensi keuangan perusahaan. Oleh karena itu, perusahaan membutuhkan sistem yang dapat membantu dalam melakukan prediksi pengeluaran berdasarkan data historis transaksi. Pemanfaatan teknologi machine learning, khususnya pendekatan time series forecasting dengan LSTM, menawarkan solusi untuk mempelajari pola pengeluaran dari masa lalu guna meramalkan pengeluaran di masa depan. Dengan prediksi yang akurat, perusahaan dapat mengelola anggaran lebih efisien, menghindari pemborosan, dan mendukung pengambilan keputusan strategis.
 
-## 2. Dataset
+## Business Understanding
 
-Dataset berisi **500 data transaksi** dengan **9 kolom**. Kolom target adalah `TotalCost`, sedangkan kolom `PurchaseDate` digunakan sebagai acuan waktu.
+### Problem Statement
+Perusahaan mengalami kesulitan dalam memprediksi pengeluaran bulanannya akibat fluktuasi dalam volume transaksi pembelian. Hal ini menyulitkan dalam menyusun perencanaan anggaran dan strategi pengadaan.
 
-### Informasi Dataset:
-- Tidak terdapat nilai kosong (missing value).
-- Data difokuskan hanya pada kolom `PurchaseDate` dan `TotalCost`.
-- Data diresemple menjadi total per bulan untuk keperluan prediksi time series.
+### Goals
+Membangun model prediksi yang dapat mengestimasi total pengeluaran bulanan perusahaan berdasarkan data historis transaksi. Tujuannya adalah untuk:
+- Memberikan estimasi pengeluaran dengan akurasi tinggi.
+- Meminimalisasi risiko pemborosan anggaran.
+- Mendukung pengambilan keputusan berbasis data.
 
-## 3. Exploratory Data Analysis (EDA)
+### Solution Statement
+Solusi yang diusulkan adalah membangun model Long Short-Term Memory (LSTM) untuk memprediksi total pengeluaran bulanan berdasarkan data time series dari transaksi pembelian. Model ini akan dilatih dari data historis dan digunakan sebagai alat bantu untuk divisi keuangan dalam menyusun anggaran.
 
-Beberapa langkah EDA dilakukan untuk memahami karakteristik data:
-- Distribusi `TotalCost` menunjukkan adanya outlier.
-- Korelasi antara `Unitprice` dan `TotalCost` cukup kuat, menunjukkan bahwa harga unit berpengaruh besar terhadap pengeluaran.
+## Data Understanding
 
-## 4. Data Preparation
+### Sumber Data
+Dataset yang digunakan adalah "Company Purchasing Dataset" yang tersedia di Kaggle:  
+🔗 https://www.kaggle.com/datasets/shahriarkabir/company-purchasing-dataset
 
-- Kolom `PurchaseDate` dikonversi ke datetime dan dijadikan index.
-- Data diresample ke bentuk bulanan.
-- Dilakukan scaling menggunakan `MinMaxScaler`.
-- Dibuat window time series untuk data training dan testing.
+### Jumlah Data
+- **Baris (rows):** 500
+- **Kolom (columns):** 9
 
-## 5. Model Development
+### Kondisi Data
+- **Missing values:** Tidak ditemukan.
+- **Data duplikat:** Tidak ada duplikasi.
+- **Outlier:** Terdapat outlier pada kolom `TotalCost`, teridentifikasi melalui EDA.
 
-### Model: LSTM
+### Deskripsi Fitur
+- `TransactionID`: ID unik untuk setiap transaksi
+- `ItemName`: Nama barang yang dibeli
+- `Category`: Kategori barang
+- `Quantity`: Jumlah unit barang yang dibeli
+- `UnitPrice`: Harga satuan barang
+- `TotalCost`: Biaya total untuk transaksi (Quantity × UnitPrice)
+- `PurchaseDate`: Tanggal pembelian (digunakan sebagai penanda waktu)
+- `Supplier`: Pemasok barang
+- `Buyer`: Nama pembeli
 
-#### Cara Kerja:
-LSTM dirancang untuk mengingat informasi dalam jangka panjang. Sangat cocok untuk data berurutan seperti time series karena mampu menangkap pola musiman.
+Hanya kolom `PurchaseDate` dan `TotalCost` yang digunakan untuk keperluan prediksi time series.
 
-#### Arsitektur:
-- LSTM dengan 64 unit dan aktivasi ReLU
-- Output layer: Dense(1)
-- Optimizer: Adam
-- Loss Function: Mean Squared Error (MSE)
+## Modeling
+
+### Model yang Digunakan: Long Short-Term Memory (LSTM)
+
+LSTM merupakan jenis Recurrent Neural Network (RNN) yang dirancang khusus untuk menangani data berurutan seperti time series. Keunggulan utama LSTM adalah kemampuannya dalam menangkap pola jangka panjang dan mengatasi masalah vanishing gradient.
+
+### Arsitektur Model
+- **Input shape:** 3 time steps (window size)
+- **Layer 1:** LSTM dengan 64 unit dan aktivasi ReLU
+- **Layer Output:** Dense(1)
+
+### Parameter yang Digunakan
+- Optimizer: `adam`
+- Loss function: `mean_squared_error`
 - Epoch: 130
-- Parameter lain menggunakan nilai default.
+- Callbacks: EarlyStopping(patience=10)
 
-## 6. Evaluasi Model
+Model dilatih dengan data pengeluaran bulanan yang telah diskalakan, dan diuji menggunakan data validasi untuk menghindari overfitting.
 
-### Metrik Evaluasi:
+## Evaluation
 
-- **MAE (Mean Absolute Error)**: Mengukur rata-rata selisih absolut antara prediksi dan nilai sebenarnya.
-- **RMSE (Root Mean Squared Error)**: Memberikan penalti lebih besar terhadap error yang besar (lebih sensitif terhadap outlier).
+### Hasil Evaluasi Model
+- **MAE (Mean Absolute Error):** 4589.25
+- **RMSE (Root Mean Squared Error):** 4760.40
 
-### Hasil Evaluasi:
+### Interpretasi dan Dampaknya terhadap Bisnis
+Model LSTM yang dikembangkan berhasil mengurangi rata-rata kesalahan prediksi hingga 4.589 satuan, yang menunjukkan performa prediksi yang akurat dan stabil. Prediksi ini membantu divisi keuangan dan pengadaan dalam menyusun rencana anggaran dan melakukan pemesanan dengan lebih terstruktur.
 
-- **MAE: 4589.25**
-- **RMSE: 4760.40**
+### Apakah Problem Statement Terjawab?
+✅ Ya. Model menjawab kebutuhan untuk memprediksi pengeluaran dengan cukup akurat.
 
-### Interpretasi:
-Model memiliki performa yang cukup baik, dengan kesalahan prediksi rata-rata sekitar 4,5 ribuan satuan. RMSE yang relatif kecil menunjukkan performa model yang stabil dan akurat.
-## 7. Kesimpulan
+### Apakah Goals Tercapai?
+✅ Ya. Prediksi yang dihasilkan mampu memberikan informasi awal yang relevan untuk perencanaan bulanan, dengan tingkat kesalahan yang dapat ditoleransi secara bisnis.
 
-Model LSTM mampu memprediksi total pengeluaran bulanan dengan cukup akurat. Ke depan, performa dapat ditingkatkan dengan tuning parameter, penambahan fitur tambahan, atau eksplorasi model time series lainnya seperti GRU atau Prophet.
+### Apakah Solusi Berdampak?
+✅ Ya. Model LSTM menunjukkan dampak yang signifikan dalam mengungkap pola pengeluaran dan menghasilkan estimasi yang dapat diandalkan sebagai alat bantu pengambilan keputusan keuangan.
+
+## Kesimpulan
+
+Proyek ini membuktikan bahwa model LSTM efektif dalam memprediksi total pengeluaran bulanan berdasarkan data historis transaksi. Hasil evaluasi menunjukkan bahwa model dapat memberikan estimasi pengeluaran yang akurat dengan tingkat kesalahan yang relatif rendah. Implementasi model ini dapat meningkatkan efisiensi perencanaan keuangan perusahaan.
+
+Langkah selanjutnya yang dapat dilakukan untuk peningkatan adalah:
+- Menambahkan fitur eksternal (exogenous features) seperti kategori barang atau supplier.
+- Mencoba arsitektur lain seperti GRU atau kombinasi CNN-LSTM.
+- Melakukan hyperparameter tuning untuk optimasi performa model.
