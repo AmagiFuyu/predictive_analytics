@@ -9,11 +9,14 @@ Dalam pengelolaan bisnis, salah satu tantangan utama adalah mengontrol dan mempr
 ### Problem Statement
 Perusahaan mengalami kesulitan dalam memprediksi pengeluaran bulanannya akibat fluktuasi dalam volume transaksi pembelian. Hal ini menyulitkan dalam menyusun perencanaan anggaran dan strategi pengadaan.
 
+Dari pernyataan diatas diusulkan masalah berikut:
+1. Bagaimana memprediksi total pengeluaran bulanan berdasarkan histori transaksi pembelian?
+2. Bagaimana membantu divisi keuangan menyusun anggaran secara lebih efisien dan akurat?
+
 ### Goals
-Membangun model prediksi yang dapat mengestimasi total pengeluaran bulanan perusahaan berdasarkan data historis transaksi. Tujuannya adalah untuk:
-- Memberikan estimasi pengeluaran dengan akurasi tinggi.
-- Meminimalisasi risiko pemborosan anggaran.
-- Mendukung pengambilan keputusan berbasis data.
+Tujuan Dari Problem Statement tersebut adalah:
+1. Mengembangkan model machine learning yang mampu memprediksi total pengeluaran bulanan dengan **MAE < 5000**.
+2. Memberikan sistem prediktif berbasis data historis untuk membantu perencanaan anggaran perusahaan.
 
 ### Solution Statement
 Solusi yang diusulkan adalah membangun model Long Short-Term Memory (LSTM) untuk memprediksi total pengeluaran bulanan berdasarkan data time series dari transaksi pembelian. Model ini akan dilatih dari data historis dan digunakan sebagai alat bantu untuk divisi keuangan dalam menyusun anggaran.
@@ -45,6 +48,18 @@ Dataset yang digunakan adalah "Company Purchasing Dataset" yang tersedia di Kagg
 - `Buyer`: Nama pembeli
 
 Hanya kolom `PurchaseDate` dan `TotalCost` yang digunakan untuk keperluan prediksi time series.
+
+## Data Preparation
+
+Pada tahap ini dilakukan persiapan data untuk memastikan model dapat dilatih dengan baik.
+
+### Langkah-langkah:
+1. **Konversi Tanggal:** Kolom `PurchaseDate` dikonversi ke format datetime.
+2. **Set Index:** Kolom tanggal diatur sebagai index agar dapat dilakukan resampling time series.
+3. **Agregasi Bulanan:** Data dirangkum menjadi total pengeluaran per bulan menggunakan fungsi `resample('M').sum()`.
+4. **Normalisasi:** Nilai `TotalCost` dinormalisasi menggunakan MinMaxScaler agar sesuai dengan input LSTM.
+5. **Pembuatan Window Time Series:** Dataset diubah menjadi format sekuensial (window size = 3) agar bisa diproses oleh model LSTM.
+6. **Split Dataset:** Dataset dibagi menjadi 80% training dan 20% testing.
 
 ## Modeling
 
