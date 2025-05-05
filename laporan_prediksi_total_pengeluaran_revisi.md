@@ -9,7 +9,7 @@ Dalam pengelolaan bisnis, salah satu tantangan utama adalah mengontrol dan mempr
 ### Problem Statement
 Perusahaan mengalami kesulitan dalam memprediksi pengeluaran bulanannya akibat fluktuasi dalam volume transaksi pembelian. Hal ini menyulitkan dalam menyusun perencanaan anggaran dan strategi pengadaan.
 
-Dari pernyataan diatas diusulkan masalah berikut:
+Dari pernyataan diatas diusulkan rumusan masalah berikut:
 1. Bagaimana memprediksi total pengeluaran bulanan berdasarkan histori transaksi pembelian?
 2. Bagaimana membantu divisi keuangan menyusun anggaran secara lebih efisien dan akurat?
 
